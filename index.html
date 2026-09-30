@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cDAVF Classifier — Alex Kostynskyy</title>
+<meta name="author" content="Alex Kostynskyy">
+<meta name="version" content="1.0.0">
+<meta name="copyright" content="© Alex Kostynskyy. All rights reserved.">
+<meta name="description" content="Classify a cranial dural arteriovenous fistula (one lesion at a time) with DES, Borden and Cognard. Research use only. By Alex Kostynskyy.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231D3B66'/%3E%3Csvg x='4' y='4' width='24' height='24' viewBox='2.5 5.5 19 19' fill='none' stroke-linecap='round'%3E%3Cpath d='M3.5 17A8.5 8.5 0 0 1 20.5 17' stroke='%23FFFFFF' stroke-opacity='0.55' stroke-width='1.6'%3E%3C/path%3E%3Cpath d='M6.5 17A5.5 5.5 0 0 1 15.54 12.79' stroke='%23FFFFFF' stroke-width='2.2'%3E%3C/path%3E%3Cpath d='M19.8 21C18.9 17.8 17.6 14.6 15.54 12.79' stroke='%23F08A6C' stroke-width='1.5'%3E%3C/path%3E%3Ccircle cx='15.54' cy='12.79' r='2' fill='%23F08A6C'%3E%3C/circle%3E%3C/svg%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F4F3EF; --panel:#FFFFFF; --panel-2:#FBFAF7; --line:#E2DFD6; --line-2:#EFEDE6; --hover:#ECEAE3;
+  --ink:#17181C; --ink-2:#2B2E36; --ink-3:#3A3E48; --muted:#5A5F6B; --field:#CFCBC0;
+  --navy:#1D3B66; --navy-soft:#F7F8FB; --navy-line:#DDE2EC; --chip-line:#D5D9E2;
+  --brick:#A1301F; --brick-ink:#8A2A1B; --brick-soft:#F6E3DF;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
+button,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+#axes{display:flex;flex-direction:column;gap:10px}
+a.btn{text-decoration:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* header */
+.top{border-bottom:1px solid var(--line);background:var(--panel-2)}
+.top-in{max-width:1440px;margin:0 auto;padding:24px 48px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.brand{display:flex;align-items:center;gap:16px;min-width:0}
+.mark{flex:none;width:44px;height:44px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center}
+.titles{min-width:0}
+.title-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-family:var(--serif);font-size:28px;font-weight:600;letter-spacing:-.01em;line-height:1.15}
+.byline{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--muted)}
+.tagline{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.meta{display:flex;align-items:center;gap:12px;flex:none}
+.ver{font-size:13px;color:var(--muted)}
+.ver b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+.pill{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--brick-ink);background:var(--brick-soft);padding:7px 12px;border-radius:999px;white-space:nowrap}
+
+/* layout */
+.main{max-width:1440px;margin:0 auto;padding:36px 48px 48px;display:grid;grid-template-columns:minmax(0,600px) minmax(0,1fr);gap:32px;align-items:start}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:4px;margin-bottom:22px}
+.sec-title{display:flex;align-items:baseline;gap:10px}
+.num{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--brick)}
+.num.out{color:var(--navy)}
+h2{margin:0;font-size:18px;font-weight:600}
+.hint{margin:0;font-size:13px;color:var(--muted)}
+
+/* combobox */
+.field{display:flex;flex-direction:column;gap:8px}
+.field + .field{margin-top:22px}
+.lab{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.risk{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--brick-ink);background:var(--brick-soft);padding:3px 8px;border-radius:999px}
+.sub-hint{font-size:12px;color:var(--muted);margin-top:-6px}
+.combo{position:relative}
+.combo input{width:100%;height:48px;padding:0 76px 0 42px;font-size:15px;background:var(--panel);border:1px solid var(--field);border-radius:10px;outline:none}
+.combo input::placeholder{color:#767B86}
+.combo input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(29,59,102,.15)}
+.combo .ico{position:absolute;top:15px;pointer-events:none}
+.combo .ico.l{left:14px}.combo .ico.r{right:14px}
+.combo .clear{position:absolute;right:40px;top:8px;width:32px;height:32px;border:none;background:transparent;border-radius:8px;color:var(--muted);cursor:pointer;display:none;align-items:center;justify-content:center}
+.combo .clear:hover{background:var(--hover)}
+.combo.has-value .clear{display:flex}
+.list{position:absolute;z-index:20;left:0;right:0;top:54px;max-height:340px;overflow:auto;margin:0;padding:6px;list-style:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(23,24,28,.12)}
+.list[hidden]{display:none}
+.list .grp{padding:10px 10px 4px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--navy)}
+.list .opt{padding:9px 10px;border-radius:8px;font-size:14px;cursor:pointer}
+.list .opt.active{background:var(--navy-soft);outline:1px solid var(--navy-line)}
+.list .opt[aria-selected="true"]{font-weight:600}
+.list .sep{height:1px;margin:6px 4px;background:var(--line)}
+.list .none{padding:12px 10px;font-size:14px;color:var(--muted)}
+.list mark{background:transparent;color:var(--navy);font-weight:600}
+.group-line{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;font-size:13px;color:var(--muted);min-height:19px}
+.group-line .dot{width:6px;height:6px;border-radius:50%;background:var(--navy);flex:none}
+.group-line b{font-weight:500;color:var(--ink)}
+
+/* segmented */
+.feat{display:grid;grid-template-columns:190px minmax(0,1fr);gap:16px;align-items:center;padding:14px 0 0;margin:14px 0 0;border:0;border-top:1px solid var(--line-2);min-width:0}
+.feat:first-of-type{margin-top:0}
+.feat legend{float:left;padding:0;font-size:14px;font-weight:500}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{display:flex;align-items:center;justify-content:center;height:40px;border-radius:9px;font-size:13px;font-weight:500;color:var(--ink-3);cursor:pointer;user-select:none;text-align:center}
+.seg label:hover{background:var(--hover)}
+.seg input:checked + label{background:var(--navy);color:#fff;font-weight:600}
+.seg input:focus-visible + label{outline:2px solid var(--navy);outline-offset:2px}
+
+/* results */
+.res-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:26px;flex-wrap:wrap}
+.actions{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;white-space:nowrap;border-radius:10px;border:1px solid var(--field);background:var(--panel);font-size:14px;font-weight:500;cursor:pointer}
+.btn:hover{background:var(--panel-2)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--hover)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.primary:hover{background:#17304f}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.combo .clear:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+
+.progress{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px dashed var(--field);border-radius:14px;background:var(--panel-2);margin-bottom:22px;font-size:14px;color:var(--ink-3)}
+.bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--navy);width:0;transition:width .2s}
+
+.des{display:flex;flex-direction:column;gap:18px;padding:24px;background:var(--navy-soft);border:1px solid var(--navy-line);border-radius:14px}
+.kicker{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
+.des-main{display:flex;flex-direction:column;gap:6px}
+.des-title{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1.15}
+.des-raw{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.axis{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:center}
+.axis > span{font-size:13px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:4px 11px;border-radius:999px;border:1px solid var(--chip-line);color:var(--muted);font-size:13px;background:var(--panel)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+
+.grades{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:16px;margin-top:16px}
+.grade{display:flex;flex-direction:column;gap:14px;padding:22px 24px;border:1px solid var(--line);border-radius:14px;min-width:0}
+.big{display:flex;align-items:baseline;gap:10px;min-height:60px}
+.big b{font-family:var(--serif);font-size:60px;font-weight:600;line-height:1;color:var(--navy)}
+.big span{font-size:14px;color:var(--muted)}
+.scale{display:flex;gap:4px;flex-wrap:wrap}
+.scale span{padding:3px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted);font-family:var(--mono);font-size:12px}
+.scale span.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:500}
+
+.why{margin-top:26px}
+.why h3{margin:0 0 6px;font-size:14px;font-weight:600}
+.why-row{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:11px 0;border-top:1px solid var(--line-2)}
+.why-row b{font-size:13px;font-weight:600;color:var(--navy)}
+.why-row span{font-size:14px;line-height:1.45;color:var(--ink-2)}
+
+.survey{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;padding:16px 18px;border:1px solid var(--navy-line);border-radius:14px;background:var(--navy-soft)}
+.survey p{margin:0;font-size:14px}
+.survey p b{display:block;font-size:14px}
+.survey p span{color:var(--muted);font-size:13px}
+
+.res-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:22px;padding-top:14px;border-top:1px solid var(--line-2);font-size:12px;color:var(--muted)}
+.res-foot code{font-family:var(--mono);color:var(--ink-2)}
+
+.is-empty .des-title,.is-empty .big b{color:#B9B6AC}
+.is-empty .why,.is-empty .res-foot .combo-id{display:none}
+.notfound{padding:14px 16px;border-radius:12px;background:var(--brick-soft);color:var(--brick-ink);font-size:14px;margin-bottom:16px}
+
+/* footer */
+.foot{border-top:1px solid var(--line);background:var(--panel-2)}
+.foot-in{max-width:1440px;margin:0 auto;padding:18px 48px;display:flex;justify-content:space-between;gap:24px;font-size:12px;color:var(--muted)}
+.foot-in b{color:var(--ink);font-weight:600}
+.foot a{color:var(--navy)}
+
+/* toast + mobile bar */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;font-size:14px;padding:10px 16px;border-radius:10px;transition:.2s;z-index:60}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.mbar{display:none}
+.fatal{max-width:720px;margin:48px auto;padding:20px 24px;border-radius:14px;background:var(--brick-soft);color:var(--brick-ink)}
+
+@media (max-width:1100px){
+  .main{grid-template-columns:minmax(0,1fr);padding:20px 16px 150px}
+  .top-in{padding:16px}
+  .foot-in{padding:16px;flex-direction:column;gap:6px;padding-bottom:140px}
+  .mbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;flex-direction:column;gap:10px;padding:10px 16px calc(16px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--navy-line);border-radius:20px 20px 0 0;box-shadow:0 -8px 24px rgba(23,24,28,.08);transition:transform .2s}
+  .mbar.away{transform:translateY(110%)}
+  .mbar .handle{align-self:center;width:40px;height:4px;border-radius:2px;background:var(--field)}
+  .mbar .m-des{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.2}
+  .mbar .m-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) auto;gap:10px;align-items:center}
+  .mbar .m-g{display:flex;align-items:baseline;gap:8px;padding:8px 12px;background:var(--navy-soft);border-radius:10px;font-size:12px;color:var(--muted)}
+  .mbar .m-g b{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--navy)}
+}
+@media (max-width:640px){
+  .meta .ver{display:none}
+  h1{font-size:23px}.byline{font-size:15px}.tagline{font-size:13px}
+  .mark{width:38px;height:38px}
+  .card{padding:18px}
+  .hint{margin-left:0}
+  .feat{grid-template-columns:minmax(0,1fr);gap:8px}
+  .grades{grid-template-columns:minmax(0,1fr)}
+  .des{padding:18px}.des-title{font-size:25px}
+  .axis,.why-row{grid-template-columns:minmax(0,1fr);gap:6px}
+  .survey{flex-direction:column;align-items:stretch}
+  .top-in{align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg width="30" height="30" viewBox="2.5 5.5 19 19" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M3.5 17A8.5 8.5 0 0 1 20.5 17" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="1.6"></path><path d="M6.5 17A5.5 5.5 0 0 1 15.54 12.79" stroke="#FFFFFF" stroke-width="2.2"></path><path d="M19.8 21C18.9 17.8 17.6 14.6 15.54 12.79" stroke="#F08A6C" stroke-width="1.5"></path><circle cx="15.54" cy="12.79" r="2" fill="#F08A6C"></circle></svg>
+      </div>
+      <div class="titles">
+        <div class="title-row"><h1>cDAVF Classifier</h1><span class="byline">by Alex Kostynskyy</span></div>
+        <p class="tagline">Cranial dural arteriovenous fistula — DES, Borden and Cognard for one lesion at a time</p>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="pill">Research use only</span>
+    </div>
+  </div>
+</header>
+
+<div class="fatal" id="fatal" hidden>The classification dictionary (dictionary.js) could not be loaded. Make sure it sits in the same folder as this page.</div>
+
+<main class="main" id="app">
+  <div class="col">
+    <section class="card" aria-labelledby="h-outlets">
+      <div class="sec-head">
+        <div class="sec-title"><h2 id="h-outlets">Venous outlets</h2></div>
+        <p class="hint">One lesion per classification. Multiple fistulas: classify each lesion separately.</p>
+      </div>
+
+      <div class="field" id="f-primary">
+        <label class="lab" for="primary-input" id="primary-label">Primary venous outlet</label>
+        <div class="combo">
+          <svg class="ico l" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A5F6B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="primary-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="primary-list" autocomplete="off" spellcheck="false" placeholder="Search or choose a vein">
+          <button class="clear" type="button" aria-label="Clear primary venous outlet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <svg class="ico r" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A5F6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <ul class="list" id="primary-list" role="listbox" aria-labelledby="primary-label" hidden></ul>
+        </div>
+        <div class="group-line" aria-live="polite"></div>
+      </div>
+
+      <div class="field" id="f-secondary">
+        <label class="lab" for="secondary-input" id="secondary-label">Secondary venous outlet <span class="risk">Highest risk</span></label>
+        <span class="sub-hint">After the primary, the outlet most likely to rupture.</span>
+        <div class="combo">
+          <svg class="ico l" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A5F6B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="secondary-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="secondary-list" autocomplete="off" spellcheck="false" placeholder="Search or choose a vein">
+          <button class="clear" type="button" aria-label="Clear secondary venous outlet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <svg class="ico r" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A5F6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <ul class="list" id="secondary-list" role="listbox" aria-labelledby="secondary-label" hidden></ul>
+        </div>
+        <div class="group-line" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="h-features">
+      <div class="sec-head">
+        <div class="sec-title"><h2 id="h-features">Venous abnormalities</h2></div>
+        <p class="hint">Is each present on the angiogram? Choose Indeterminate if unclear.</p>
+      </div>
+      <div id="features"></div>
+    </section>
+  </div>
+
+  <section class="card is-empty" id="results" aria-labelledby="h-results">
+    <div class="res-head">
+      <div class="sec-title"><h2 id="h-results">Classification</h2></div>
+      <div class="actions">
+        <button class="btn" id="copy" type="button" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy result</button>
+        <button class="btn ghost" id="reset" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Reset</button>
+      </div>
+    </div>
+
+    <div class="progress" id="progress">
+      <span id="progress-text">0 of 6 inputs set</span>
+      <div class="bar" aria-hidden="true"><i id="progress-bar"></i></div>
+    </div>
+    <div class="notfound" id="notfound" hidden></div>
+
+    <div aria-live="polite" aria-atomic="true">
+      <div class="des">
+        <div class="des-main">
+          <span class="kicker">DES</span>
+          <span class="des-title" id="des-title">Awaiting inputs</span>
+          <span class="des-raw" id="des-raw">&nbsp;</span>
+        </div>
+        <div id="axes"></div>
+      </div>
+
+      <div class="grades">
+        <div class="grade">
+          <span class="kicker">Borden</span>
+          <div class="big"><b id="borden">—</b><span id="borden-sub"></span></div>
+          <div class="scale" id="borden-scale"></div>
+        </div>
+        <div class="grade">
+          <span class="kicker">Cognard</span>
+          <div class="big"><b id="cognard">—</b><span id="cognard-sub"></span></div>
+          <div class="scale" id="cognard-scale"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="why">
+      <h3>Why this result</h3>
+      <div id="why"></div>
+    </div>
+
+    <div class="survey" id="survey" hidden>
+      <p><b>Help validate this tool</b><span>One-minute survey. Your classification and version details are filled in for you.</span></p>
+      <a class="btn primary" id="survey-link" href="#" target="_blank" rel="noopener">Give feedback</a>
+    </div>
+
+    <div class="res-foot">
+      <span><span class="combo-id">Combination <code id="combo-id">—</code> · </span>Classifier <code id="appver2">—</code> · Dictionary <code id="ver2">—</code></span>
+      <span>Output of a deterministic lookup, not a clinical recommendation</span>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span><b>© <span id="year">2026</span> Alex Kostynskyy.</b> cDAVF classification algorithm and DES. All rights reserved. <span id="foot-ver"></span><span id="contact"></span></span>
+    <span>For research use only. Not for clinical decision-making. Reproduction or adaptation requires the author’s written permission.</span>
+  </div>
+</footer>
+
+<div class="mbar away" id="mbar" aria-hidden="true">
+  <div class="handle"></div>
+  <div><span class="kicker">DES</span><div class="m-des" id="m-des"></div></div>
+  <div class="m-row">
+    <div class="m-g">Borden <b id="m-borden"></b></div>
+    <div class="m-g">Cognard <b id="m-cognard"></b></div>
+    <button class="btn" type="button" id="m-why" tabindex="-1">Why</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="config.js"></script>
+<script src="dictionary.js"></script>
+<script>
+(function(){
+  'use strict';
+  /* Classifier (page code) version. Bump when index.html changes: major.minor.patch */
+  var APP_VERSION = '1.0.0', APP_DATE = '2026-09-30';
+  var D = window.CDAVF_DICTIONARY, CFG = window.CDAVF_CONFIG || {};
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  $('year').textContent = new Date().getFullYear();
+  if (CFG.contactEmail) $('contact').innerHTML = ' Contact: <a href="mailto:' + esc(CFG.contactEmail) + '">' + esc(CFG.contactEmail) + '</a>';
+
+  if (!D || !D.rows) { $('fatal').hidden = false; $('app').hidden = true; return; }
+
+  /* ---------- dictionary ---------- */
+  var S = D.strings, NK = D.keyFields.length, index = new Map();
+  var keySets = D.keyFields.map(function(){ return []; });
+  var outSets = {};
+  D.outFields.forEach(function(f){ outSets[f] = []; });
+  D.rows.forEach(function(r){
+    var key = [], out = {};
+    for (var i = 0; i < NK; i++) key.push(S[r[1 + i]]);
+    D.outFields.forEach(function(f, j){ out[f] = S[r[1 + NK + j]]; if (outSets[f].length < 50 && outSets[f].indexOf(out[f]) < 0) outSets[f].push(out[f]); });
+    key.forEach(function(k, i){ if (keySets[i].indexOf(k) < 0) keySets[i].push(k); });
+    index.set(key.join('|'), { id: r[0], out: out });
+  });
+  var VERSION = 'v' + D.version, FP = D.fingerprint;
+  var APP = 'v' + APP_VERSION;
+  $('ver2').textContent = VERSION; $('appver2').textContent = APP;
+  $('foot-ver').textContent = 'Classifier ' + APP + ' (' + APP_DATE + ').';
+
+  function order(list, pref){
+    return pref.filter(function(p){ return list.indexOf(p) >= 0; }).concat(list.filter(function(x){ return pref.indexOf(x) < 0; }).sort());
+  }
+  var GROUP_ORDER = ['Dural sinus / plexus','Cortical vein (pial/leptomeningeal)','Deep leptomeningeal vein','Pachymeningeal / extracranial collectors','Spinal /perimedullary vein','Spinal / perimedullary vein','Spinal/perimedullary vein','Indeterminate'];
+  var LEVEL_ORDER = ['Yes','No','Indeterminate'];
+  var FEATURE_LABELS = { Venous_ectasia: 'Venous ectasia', Pseudophlebitic_pattern: 'Pseudophlebitic pattern', Venous_outlets_restriction: 'Venous outlet restriction', Sinus_reflux: 'Sinus reflux' };
+  var FEATURE_SHORT = { Venous_ectasia: 'Ectasia', Pseudophlebitic_pattern: 'Pseudophlebitic', Venous_outlets_restriction: 'Restriction', Sinus_reflux: 'Reflux' };
+
+  var veins = D.veins.map(function(v){ return { name: S[v[0]], group: S[v[1]] }; });
+  var UNKNOWN_GROUP = 'Indeterminate', UNKNOWN = 'Indeterminate';
+  function veinsFor(groups){
+    var byGroup = {};
+    veins.forEach(function(v){ if (groups.indexOf(v.group) >= 0 && v.group !== UNKNOWN_GROUP) (byGroup[v.group] = byGroup[v.group] || []).push(v); });
+    var out = order(Object.keys(byGroup), GROUP_ORDER).map(function(g){ return { group: g, items: byGroup[g] }; });
+    /* "Pending", "Unknown" and the Indeterminate group are shown as one plain "Indeterminate" option */
+    if (groups.indexOf(UNKNOWN_GROUP) >= 0) out.push({ group: null, items: [{ name: UNKNOWN, group: UNKNOWN_GROUP }] });
+    return out;
+  }
+  var groupOf = {}; veins.forEach(function(v){ groupOf[v.name] = v.group; });
+  groupOf[UNKNOWN] = UNKNOWN_GROUP;
+  function groupLabel(g){ return g === UNKNOWN_GROUP ? UNKNOWN : g; }
+  function veinText(v){ return groupOf[v] === UNKNOWN_GROUP ? UNKNOWN : v + ' [' + groupOf[v] + ']'; }
+
+  /* ---------- state ---------- */
+  var state = { primary: null, secondary: null, f: {} };
+  var featureFields = D.keyFields.slice(2);
+
+  /* ---------- combobox ---------- */
+  function Combo(fieldId, groups, onPick){
+    var root = $(fieldId), input = root.querySelector('input'), list = root.querySelector('.list'),
+        combo = root.querySelector('.combo'), clear = root.querySelector('.clear'), gline = root.querySelector('.group-line');
+    var data = veinsFor(groups), value = null, active = -1, opts = [], uid = fieldId + '-o';
+
+    function highlight(text, q){
+      if (!q) return esc(text);
+      var i = text.toLowerCase().indexOf(q);
+      return i < 0 ? esc(text) : esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+    }
+    function build(q){
+      q = (q || '').trim().toLowerCase();
+      var html = '', n = 0; opts = [];
+      data.forEach(function(g){
+        var gm = !!g.group && g.group.toLowerCase().indexOf(q) >= 0;
+        var items = g.items.filter(function(v){ return !q || gm || v.name.toLowerCase().indexOf(q) >= 0; });
+        if (!items.length) return;
+        html += g.group ? '<li class="grp" role="presentation">' + esc(g.group) + '</li>' : '<li class="sep" role="presentation"></li>';
+        items.forEach(function(v){
+          html += '<li class="opt" role="option" id="' + uid + n + '" data-i="' + n + '" aria-selected="' + (v.name === value) + '">' + highlight(v.name, q) + '</li>';
+          opts.push(v.name); n++;
+        });
+      });
+      list.innerHTML = html || '<li class="none" role="presentation">No vein matches “' + esc(q) + '”</li>';
+      setActive(opts.length ? Math.max(0, opts.indexOf(value)) : -1);
+    }
+    function setActive(i){
+      active = i;
+      var items = list.querySelectorAll('.opt');
+      items.forEach(function(el){ el.classList.remove('active'); });
+      if (i >= 0 && items[i]) { items[i].classList.add('active'); input.setAttribute('aria-activedescendant', items[i].id); items[i].scrollIntoView({ block: 'nearest' }); }
+      else input.removeAttribute('aria-activedescendant');
+    }
+    function open(q){ build(q); list.hidden = false; input.setAttribute('aria-expanded', 'true'); }
+    function close(){ list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+    function set(v, silent){
+      value = v; input.value = v || '';
+      combo.classList.toggle('has-value', !!v);
+      gline.innerHTML = v ? '<span class="dot"></span><span>Group</span><b>' + esc(groupLabel(groupOf[v])) + '</b>' : '';
+      if (!silent) onPick(v);
+    }
+    input.addEventListener('focus', function(){ open(''); input.select(); });
+    input.addEventListener('click', function(){ if (list.hidden) open(''); });
+    input.addEventListener('input', function(){ open(input.value); });
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (list.hidden) open(''); else setActive(Math.min(opts.length - 1, active + 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(0, active - 1)); }
+      else if (e.key === 'Enter') { if (!list.hidden && active >= 0) { e.preventDefault(); set(opts[active]); close(); } }
+      else if (e.key === 'Escape') { if (!list.hidden) { e.preventDefault(); input.value = value || ''; close(); } }
+      else if (e.key === 'Tab') { if (!list.hidden && active >= 0 && input.value.trim() && input.value !== value) set(opts[active]); close(); }
+    });
+    input.addEventListener('blur', function(){ setTimeout(function(){ if (document.activeElement !== input) { input.value = value || ''; close(); } }, 120); });
+    list.addEventListener('mousedown', function(e){ e.preventDefault(); });
+    list.addEventListener('click', function(e){ var li = e.target.closest('.opt'); if (!li) return; set(opts[+li.dataset.i]); close(); input.blur(); });
+    clear.addEventListener('click', function(){ set(null); input.focus(); });
+    return { set: set };
+  }
+
+  var cPrimary = Combo('f-primary', keySets[0], function(v){ state.primary = v; render(); });
+  var cSecondary = Combo('f-secondary', keySets[1], function(v){ state.secondary = v; render(); });
+
+  /* ---------- features ---------- */
+  var fhtml = '';
+  featureFields.forEach(function(f, fi){
+    var levels = order(keySets[2 + fi], LEVEL_ORDER);
+    fhtml += '<fieldset class="feat"><legend>' + esc(FEATURE_LABELS[f] || f.replace(/_/g, ' ')) + '</legend><div class="seg" style="grid-template-columns:repeat(' + levels.length + ',minmax(0,1fr))">';
+    levels.forEach(function(l, li){
+      var id = 'f' + fi + '_' + li;
+      fhtml += '<input type="radio" name="' + esc(f) + '" id="' + id + '" value="' + esc(l) + '"><label for="' + id + '">' + esc(l) + '</label>';
+    });
+    fhtml += '</div></fieldset>';
+  });
+  $('features').innerHTML = fhtml;
+  $('features').addEventListener('change', function(e){ if (e.target.type === 'radio') { state.f[e.target.name] = e.target.value; render(); } });
+
+  /* ---------- helpers ---------- */
+  function shortDir(v){ var i = v.indexOf(': '); return i >= 0 ? v.slice(i + 2) : v; }
+  function roman(v){ var m = /^(\d)(.*)$/.exec(String(v)); return m ? ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][+m[1]] + m[2] : v; }
+  function strip(t){ var i = t.indexOf('→'); return (i >= 0 ? t.slice(i + 1) : t).trim(); }
+  function isIndet(v){ return /indeterminate|unknown/i.test(v); }
+  var DIR_OPTS = order(outSets['Directness_DES'].map(shortDir), ['Direct','Non-direct','Indeterminate']);
+  var EXC_OPTS = order(outSets['Exclusivity_DES'], ['Exclusive','Non-exclusive','Exclusivity unknown']);
+  var STR_OPTS = order(outSets['Strain_DES'], ['Strain','No strain','Strain indeterminate']);
+  var BOR_OPTS = order(outSets['Borden'].filter(function(v){ return !isIndet(v); }), ['1','2','3']);
+  var COG_OPTS = order(outSets['Cognard'].filter(function(v){ return !isIndet(v); }), ['1','2a','2b','2a+b','3','4','5']);
+
+  function chips(opts, sel){ return opts.map(function(o){ return '<span class="chip' + (o === sel ? ' on' : '') + '">' + esc(o) + '</span>'; }).join(''); }
+  function scale(opts, sel){ return opts.map(function(o){ return '<span class="' + (o === sel ? 'on' : '') + '">' + esc(roman(o)) + '</span>'; }).join(''); }
+  function axes(r){
+    var a = [['Directness', DIR_OPTS, r ? shortDir(r.out['Directness_DES']) : null], ['Exclusivity', EXC_OPTS, r ? r.out['Exclusivity_DES'] : null], ['Strain', STR_OPTS, r ? r.out['Strain_DES'] : null]];
+    return a.map(function(x){ return '<div class="axis"><span>' + x[0] + '</span><div class="chips">' + chips(x[1], x[2]) + '</div></div>'; }).join('');
+  }
+
+  /* ---------- render ---------- */
+  var current = null;
+  function render(){
+    var key = [state.primary ? groupOf[state.primary] : null, state.secondary ? groupOf[state.secondary] : null]
+      .concat(featureFields.map(function(f){ return state.f[f] || null; }));
+    var set = (state.primary ? 1 : 0) + (state.secondary ? 1 : 0) + featureFields.filter(function(f){ return state.f[f]; }).length;
+    var total = 2 + featureFields.length;
+    $('progress').hidden = set === total;
+    $('progress-text').textContent = set + ' of ' + total + ' inputs set';
+    $('progress-bar').style.width = (100 * set / total) + '%';
+
+    var r = set === total ? index.get(key.join('|')) : null;
+    current = r || null;
+    $('notfound').hidden = !(set === total && !r);
+    if (set === total && !r) $('notfound').textContent = 'This combination is not in dictionary ' + VERSION + '.';
+
+    var res = $('results');
+    res.classList.toggle('is-empty', !r);
+    $('copy').disabled = !r;
+    $('axes').innerHTML = axes(r);
+    $('borden-scale').innerHTML = scale(BOR_OPTS, r ? r.out['Borden'] : null);
+    $('cognard-scale').innerHTML = scale(COG_OPTS, r ? r.out['Cognard'] : null);
+
+    if (!r) {
+      $('des-title').textContent = set === total ? 'Not in dictionary' : 'Awaiting inputs';
+      $('des-raw').innerHTML = '&nbsp;';
+      $('borden').textContent = '—'; $('cognard').textContent = '—';
+      $('borden-sub').textContent = ''; $('cognard-sub').textContent = '';
+      $('why').innerHTML = ''; $('combo-id').textContent = '—';
+      $('survey').hidden = true;
+      $('mbar').classList.add('away');
+      return;
+    }
+    var o = r.out;
+    var title = shortDir(o['Directness_DES']) + ' · ' + o['Exclusivity_DES'] + ' · ' + o['Strain_DES'];
+    title = title.replace(/-/g, '‑'); /* keep "Non-exclusive" on one line */
+    $('des-title').textContent = title;
+    $('des-raw').textContent = o['DES'];
+    var b = isIndet(o['Borden']), c = isIndet(o['Cognard']);
+    $('borden').textContent = b ? '?' : roman(o['Borden']);
+    $('borden-sub').textContent = b ? 'Indeterminate' : 'Type ' + o['Borden'];
+    $('cognard').textContent = c ? '?' : roman(o['Cognard']);
+    $('cognard-sub').textContent = c ? 'Indeterminate' : 'Type ' + o['Cognard'];
+    $('why').innerHTML = [['Directness', 'Directness rationale_DES'], ['Exclusivity', 'Exclusivity rationale_DES'], ['Strain', 'Strain rationale_DES'], ['Borden', 'Borden rationale'], ['Cognard', 'Cognard rationale']]
+      .filter(function(x){ return o[x[1]]; })
+      .map(function(x){ return '<div class="why-row"><b>' + x[0] + '</b><span>' + esc(strip(o[x[1]])) + '</span></div>'; }).join('');
+    $('combo-id').textContent = '#' + r.id;
+
+    $('m-des').textContent = title;
+    $('m-borden').textContent = b ? '?' : roman(o['Borden']);
+    $('m-cognard').textContent = c ? '?' : roman(o['Cognard']);
+    updateBar();
+
+    var link = CFG.surveyLink || '';
+    if (link && link.indexOf('CLASSIFICATION') >= 0) {
+      $('survey-link').href = link.replace('CLASSIFICATION', encodeURIComponent(summary(r))).replace('VERSION', encodeURIComponent('Classifier ' + APP + ' · Dictionary ' + VERSION + ' (' + FP + ')'));
+      $('survey').hidden = false;
+    } else { $('survey').hidden = true; }
+  }
+
+  function gradeText(v){ return isIndet(v) ? 'Indeterminate' : roman(v); }
+  function summary(r){
+    return state.primary + ' → ' + state.secondary + '; ' +
+      featureFields.map(function(f){ return (FEATURE_SHORT[f] || f) + ' ' + state.f[f]; }).join('; ') +
+      ' ⇒ DES ' + r.out['DES'] + '; Borden ' + gradeText(r.out['Borden']) + '; Cognard ' + gradeText(r.out['Cognard']) + '; #' + r.id;
+  }
+  /* ---------- copy report: plain text for editors, formatted table for Word / email ---------- */
+  function veinPair(v){ return groupOf[v] === UNKNOWN_GROUP ? [UNKNOWN, ''] : [v, groupOf[v]]; }
+  function report(r){
+    var o = r.out, p = veinPair(state.primary), s2 = veinPair(state.secondary);
+    var dirCode = o['Directness_DES'].indexOf(': ') >= 0 ? o['Directness_DES'].split(': ')[0] : '';
+    var desText = [shortDir(o['Directness_DES']), o['Exclusivity_DES'], o['Strain_DES']].join(', ') + (dirCode ? ' (' + dirCode + ')' : '');
+    return {
+      title: 'cDAVF classification (one lesion)',
+      sections: [
+        { title: 'Inputs', rows: [
+          ['Primary venous outlet', p[0] + (p[1] ? ' — ' + p[1] : '')],
+          ['Secondary venous outlet (highest risk)', s2[0] + (s2[1] ? ' — ' + s2[1] : '')]
+        ].concat(featureFields.map(function(f){ return [FEATURE_LABELS[f] || f, state.f[f]]; })) },
+        { title: 'Result', rows: [['DES', desText], ['Borden', gradeText(o['Borden'])], ['Cognard', gradeText(o['Cognard'])]] },
+        { title: 'Why', rows: [['Directness', 'Directness rationale_DES'], ['Exclusivity', 'Exclusivity rationale_DES'], ['Strain', 'Strain rationale_DES'], ['Borden', 'Borden rationale'], ['Cognard', 'Cognard rationale']]
+            .filter(function(x){ return o[x[1]]; }).map(function(x){ return [x[0], strip(o[x[1]])]; }) }
+      ],
+      footer: ['cDAVF Classifier ' + APP + ' by Alex Kostynskyy · Dictionary ' + VERSION + ' (' + FP + ') · Combination #' + r.id,
+               'Research use only. Not for clinical decision-making.']
+    };
+  }
+  function reportText(rep){
+    var out = [rep.title, ''];
+    rep.sections.forEach(function(sec){
+      out.push(sec.title.toUpperCase());
+      sec.rows.forEach(function(row){ out.push(row[0] + ': ' + row[1]); });
+      out.push('');
+    });
+    return out.concat(rep.footer).join('\n');
+  }
+  function reportHtml(rep){
+    var f = 'font-family:Calibri,Arial,sans-serif;font-size:11pt;';
+    var td = 'padding:3px 16px 3px 0;vertical-align:top;' + f;
+    var h = '<div style="' + f + 'color:#17181C"><p style="margin:0 0 6px;font-size:13pt;font-weight:bold;color:#1D3B66">' + esc(rep.title) + '</p><table style="border-collapse:collapse">';
+    rep.sections.forEach(function(sec){
+      h += '<tr><td colspan="2" style="padding:10px 0 3px;font-weight:bold;color:#1D3B66;border-bottom:1px solid #DDE2EC;' + f + '">' + esc(sec.title) + '</td></tr>';
+      sec.rows.forEach(function(row){
+        h += '<tr><td style="' + td + 'color:#5A5F6B;white-space:nowrap">' + esc(row[0]) + '</td><td style="' + td + (sec.title === 'Result' ? 'font-weight:bold;' : '') + '">' + esc(row[1]) + '</td></tr>';
+      });
+    });
+    h += '</table><p style="margin:12px 0 0;font-size:9pt;color:#5A5F6B">' + rep.footer.map(esc).join('<br>') + '</p></div>';
+    return h;
+  }
+
+  /* ---------- actions ---------- */
+  function toast(msg){ var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+  $('copy').addEventListener('click', function(){
+    if (!current) return;
+    var rep = report(current), text = reportText(rep), html = reportHtml(rep);
+    function ok(){ toast('Result copied'); }
+    function fallback(){
+      var box = document.createElement('div');
+      box.innerHTML = html; box.style.position = 'fixed'; box.style.left = '-9999px'; box.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(box);
+      var sel = window.getSelection(), range = document.createRange(); range.selectNodeContents(box); sel.removeAllRanges(); sel.addRange(range);
+      function onCopy(e){ e.clipboardData.setData('text/plain', text); e.clipboardData.setData('text/html', html); e.preventDefault(); }
+      document.addEventListener('copy', onCopy);
+      try { document.execCommand('copy'); ok(); } catch (e) { toast('Copy failed'); }
+      document.removeEventListener('copy', onCopy); sel.removeAllRanges(); box.remove();
+    }
+    if (navigator.clipboard && window.isSecureContext && window.ClipboardItem) {
+      navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([text], { type: 'text/plain' }), 'text/html': new Blob([html], { type: 'text/html' }) })]).then(ok, fallback);
+    } else if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(ok, fallback);
+    } else fallback();
+  });
+  $('reset').addEventListener('click', function(){
+    state = { primary: null, secondary: null, f: {} };
+    cPrimary.set(null, true); cSecondary.set(null, true);
+    document.querySelectorAll('#features input').forEach(function(i){ i.checked = false; });
+    render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  $('m-why').addEventListener('click', function(){ $('results').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
+  /* mobile bar: visible when a result exists and the results card is off-screen */
+  var resultsVisible = false;
+  function updateBar(){ $('mbar').classList.toggle('away', !current || resultsVisible); }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function(es){ resultsVisible = es[0].isIntersecting; updateBar(); }, { threshold: 0.15 }).observe($('results'));
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

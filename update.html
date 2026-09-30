@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="author" content="Alex Kostynskyy">
+<title>Dictionary Updater — cDAVF Classifier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F4F3EF; --panel:#FFFFFF; --panel-2:#FBFAF7; --line:#E2DFD6; --line-2:#EFEDE6;
+  --ink:#17181C; --ink-2:#2B2E36; --muted:#5A5F6B; --field:#CFCBC0;
+  --navy:#1D3B66; --navy-soft:#F7F8FB; --navy-line:#DDE2EC;
+  --brick:#A1301F; --brick-ink:#8A2A1B; --brick-soft:#F6E3DF;
+  --amber-ink:#7A4B00; --amber-soft:#FBF0D9; --green-ink:#1F5B3A; --green-soft:#E3F1E8;
+  --sans:'IBM Plex Sans',system-ui,sans-serif; --serif:'Newsreader',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:22px 32px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+h1{margin:0;font-family:var(--serif);font-size:26px;font-weight:600}
+h2{margin:0 0 12px;font-size:17px;font-weight:600}
+.sub{margin:2px 0 0;color:var(--muted);font-size:14px}
+.pill{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--brick-ink);background:var(--brick-soft);padding:6px 12px;border-radius:999px}
+main{max-width:1040px;margin:0 auto;padding:28px 32px 64px;display:flex;flex-direction:column;gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px}
+.drop{border:1.5px dashed var(--field);border-radius:14px;padding:32px;text-align:center;background:var(--panel-2);cursor:pointer}
+.drop.over{border-color:var(--navy);background:var(--navy-soft)}
+.drop strong{display:block;font-size:16px;margin-bottom:4px}
+.drop span{color:var(--muted);font-size:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--field);background:var(--panel);font:500 14px var(--sans);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.stat{background:var(--navy-soft);border:1px solid var(--navy-line);border-radius:12px;padding:12px 14px}
+.stat b{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--navy)}
+.stat span{font-family:var(--mono);font-size:14px;word-break:break-all}
+.msg{border-radius:10px;padding:10px 14px;margin:8px 0;font-size:14px}
+.msg.err{background:var(--brick-soft);color:var(--brick-ink)}
+.msg.warn{background:var(--amber-soft);color:var(--amber-ink)}
+.msg.ok{background:var(--green-soft);color:var(--green-ink)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-top:1px solid var(--line-2);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+td.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}
+ol.steps{margin:0;padding-left:20px}
+ol.steps li{margin:4px 0}
+footer{padding:18px 32px;border-top:1px solid var(--line);background:var(--panel-2);font-size:12px;color:var(--muted)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Dictionary Updater</h1>
+    <p class="sub">cDAVF Classifier · for the author only · nothing is uploaded, everything runs in this browser</p>
+  </div>
+  <span class="pill">Author tool</span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>1 · Choose the new Excel dictionary</h2>
+    <label class="drop" id="drop" for="file">
+      <strong>Drop DES_BORDEN_COGNARD_DICTIONARY_YYYYMMDD.xlsm here</strong>
+      <span>or click to choose. The date in the file name becomes the version.</span>
+    </label>
+    <input type="file" id="file" accept=".xlsm,.xlsx" class="hidden">
+    <p class="muted" id="live" style="margin:12px 0 0"></p>
+  </section>
+
+  <section class="card hidden" id="report">
+    <h2>2 · Check</h2>
+    <div class="stats" id="stats"></div>
+    <div id="msgs" style="margin-top:12px"></div>
+    <div id="changes"></div>
+  </section>
+
+  <section class="card hidden" id="publish">
+    <h2>3 · Publish</h2>
+    <ol class="steps">
+      <li>Download the new <code>dictionary.js</code>.</li>
+      <li>In your GitHub repository click <b>Add file → Upload files</b>, drop it in, and commit. It replaces the old one.</li>
+      <li>The classifier shows the new version within about a minute. GitHub keeps every previous version in its history.</li>
+    </ol>
+    <p style="margin:16px 0 0"><button class="btn primary" id="dl" type="button" disabled>Download dictionary.js</button></p>
+  </section>
+</main>
+
+<footer>© Alex Kostynskyy. cDAVF classification algorithm and DES. All rights reserved. Research use only.</footer>
+
+<script src="dictionary.js" onerror="void 0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var TABLE_SHEET = 'DES_Universal', LIST_SHEET = 'LISTS';
+  var ID_COL = 'UNIVERSAL_ID';
+  var KEY_FIELDS = ['Primary_venous_drain_group','Secondary_venous_drain_group','Venous_ectasia','Pseudophlebitic_pattern','Venous_outlets_restriction','Sinus_reflux'];
+  var OUT_FIELDS = ['Directness_DES','Directness rationale_DES','Exclusivity_DES','Exclusivity rationale_DES','Strain_DES','Strain rationale_DES','DES','DES rationale','Borden','Borden rationale','Cognard','Cognard rationale'];
+  var MAIN_OUTS = ['Directness_DES','Exclusivity_DES','Strain_DES','DES','Borden','Cognard'];
+  var VEIN_COL = 'cDAVF drainage_list_REVISED', VEIN_GROUP_COL = 'cDAVF_drainage_group_final';
+
+  var LIVE = window.CDAVF_DICTIONARY || null;
+  var built = null;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function raw(v){ return v === null || v === undefined ? '' : String(v); }
+  function norm(v){ return raw(v).replace(/ /g,' ').replace(/\s+/g,' ').trim(); }
+  function cyrb53(str){
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0, ch; i < str.length; i++){ ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');
+  }
+
+  if (LIVE) {
+    $('live').textContent = 'Live dictionary loaded for comparison: v' + LIVE.version + ' · fingerprint ' + LIVE.fingerprint + ' · ' + LIVE.rows.length + ' combinations.';
+  } else {
+    $('live').textContent = 'No live dictionary.js found next to this page, so no change report. Open this tool from your published site to compare.';
+  }
+
+  var drop = $('drop');
+  ['dragenter','dragover'].forEach(function(e){ drop.addEventListener(e, function(ev){ ev.preventDefault(); drop.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(e){ drop.addEventListener(e, function(ev){ ev.preventDefault(); drop.classList.remove('over'); }); });
+  drop.addEventListener('drop', function(ev){ if (ev.dataTransfer.files[0]) handle(ev.dataTransfer.files[0]); });
+  $('file').addEventListener('change', function(){ if (this.files[0]) handle(this.files[0]); });
+  $('dl').addEventListener('click', download);
+
+  function handle(file){
+    var fr = new FileReader();
+    fr.onload = function(){
+      try { build(file.name, new Uint8Array(fr.result)); }
+      catch (e) { showFatal('Could not read this file: ' + e.message); }
+    };
+    fr.readAsArrayBuffer(file);
+  }
+
+  function showFatal(text){
+    $('report').classList.remove('hidden'); $('publish').classList.add('hidden');
+    $('stats').innerHTML = ''; $('changes').innerHTML = '';
+    $('msgs').innerHTML = '<div class="msg err">' + esc(text) + '</div>';
+  }
+
+  function findHeader(aoa, name, maxRows){
+    for (var r = 0; r < Math.min(maxRows, aoa.length); r++){
+      var row = aoa[r] || [];
+      for (var c = 0; c < row.length; c++){ if (norm(row[c]) === name) return r; }
+    }
+    return -1;
+  }
+
+  function build(fileName, bytes){
+    if (typeof XLSX === 'undefined') { showFatal('The spreadsheet reader did not load. Check your internet connection and reload this page.'); return; }
+    var errors = [], warnings = [];
+    var wb = XLSX.read(bytes, { type: 'array' });
+    var ws = wb.Sheets[TABLE_SHEET], wl = wb.Sheets[LIST_SHEET];
+    if (!ws) { showFatal('Sheet "' + TABLE_SHEET + '" not found.'); return; }
+    if (!wl) { showFatal('Sheet "' + LIST_SHEET + '" not found.'); return; }
+
+    var aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: false });
+    var hr = findHeader(aoa, ID_COL, 6);
+    if (hr < 0) { showFatal('Header "' + ID_COL + '" not found in ' + TABLE_SHEET + '.'); return; }
+    var head = aoa[hr].map(norm), col = {};
+    [ID_COL].concat(KEY_FIELDS, OUT_FIELDS).forEach(function(f){ col[f] = head.indexOf(f); if (col[f] < 0) errors.push('Column "' + f + '" missing in ' + TABLE_SHEET + '.'); });
+    if (errors.length) { showFatal(errors.join(' ')); return; }
+
+    var spaced = 0, byKey = new Map(), dupSame = 0, dupConflict = [], emptyOut = [], emptyKey = 0;
+    for (var r = hr + 1; r < aoa.length; r++){
+      var row = aoa[r] || [];
+      if (row[col[ID_COL]] === null || row[col[ID_COL]] === undefined || raw(row[col[ID_COL]]).trim() === '') continue;
+      var id = norm(row[col[ID_COL]]);
+      var key = KEY_FIELDS.map(function(f){ var v = raw(row[col[f]]); if (v !== norm(v)) spaced++; return norm(v); });
+      if (key.some(function(k){ return k === ''; })) { emptyKey++; continue; }
+      var out = OUT_FIELDS.map(function(f){ var v = raw(row[col[f]]); if (v !== norm(v) && MAIN_OUTS.indexOf(f) >= 0) spaced++; return norm(v); });
+      MAIN_OUTS.forEach(function(f){ if (out[OUT_FIELDS.indexOf(f)] === '') emptyOut.push(id + ' (' + f + ')'); });
+      var k = key.join('|');
+      if (byKey.has(k)) {
+        var prev = byKey.get(k);
+        if (prev.out.join('\u0001') === out.join('\u0001')) { dupSame++; }
+        else { dupConflict.push(prev.id + ' vs ' + id); }
+        continue;
+      }
+      byKey.set(k, { id: id, key: key, out: out });
+    }
+
+    // veins
+    var la = XLSX.utils.sheet_to_json(wl, { header: 1, raw: true, defval: null, blankrows: false });
+    var lh = findHeader(la, VEIN_COL, 4), veins = [];
+    if (lh < 0) { errors.push('Column "' + VEIN_COL + '" not found in ' + LIST_SHEET + '.'); }
+    else {
+      var lhead = la[lh].map(norm), vc = lhead.indexOf(VEIN_COL), gc = lhead.indexOf(VEIN_GROUP_COL);
+      if (gc < 0) errors.push('Column "' + VEIN_GROUP_COL + '" not found in ' + LIST_SHEET + '.');
+      else {
+        var seen = {};
+        for (var i = lh + 1; i < la.length; i++){
+          var lr = la[i] || [], vn = norm(lr[vc]);
+          if (!vn) continue;
+          if (raw(lr[gc]) !== norm(lr[gc])) spaced++;
+          if (seen[vn]) { warnings.push('Vein "' + vn + '" listed twice; first entry kept.'); continue; }
+          seen[vn] = 1; veins.push([vn, norm(lr[gc])]);
+        }
+      }
+    }
+
+    var rows = Array.from(byKey.values());
+    var sets = KEY_FIELDS.map(function(_, j){ var s = new Set(); rows.forEach(function(x){ s.add(x.key[j]); }); return Array.from(s); });
+    var expected = sets.reduce(function(a, s){ return a * s.length; }, 1);
+    var usable = new Set(sets[0].concat(sets[1]));
+    veins.forEach(function(v){ if (!usable.has(v[1])) warnings.push('Vein "' + v[0] + '" has group "' + v[1] + '", which does not appear in ' + TABLE_SHEET + '. It will not be selectable.'); });
+
+    if (emptyKey) errors.push(emptyKey + ' row(s) with an empty input value.');
+    if (emptyOut.length) errors.push(emptyOut.length + ' empty result cell(s), e.g. ID ' + emptyOut.slice(0, 5).join(', ') + '. Recalculate the workbook in Excel and save.');
+    if (dupConflict.length) errors.push(dupConflict.length + ' duplicate combination(s) with different results: IDs ' + dupConflict.slice(0, 5).join('; ') + '.');
+    if (dupSame) warnings.push(dupSame + ' duplicate row(s) with identical results were merged.');
+    if (spaced) warnings.push(spaced + ' label(s) had extra or non-breaking spaces; cleaned automatically.');
+    if (rows.length < expected) warnings.push((expected - rows.length) + ' of ' + expected + ' possible input combinations are missing; the classifier will report them as not in the dictionary.');
+
+    var m = /(\d{4})(\d{2})(\d{2})/.exec(fileName);
+    var version = m ? (m[1] + '-' + m[2] + '-' + m[3]) : '';
+    if (!version) errors.push('No date (YYYYMMDD) found in the file name. Rename it, e.g. DES_BORDEN_COGNARD_DICTIONARY_20261002.xlsm.');
+
+    // string pool (deterministic)
+    rows.sort(function(a, b){ return (+a.id || 0) - (+b.id || 0) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); });
+    var pool = [], pix = new Map();
+    function S(s){ if (!pix.has(s)) { pix.set(s, pool.length); pool.push(s); } return pix.get(s); }
+    var packedRows = rows.map(function(x){ return [/^\d+$/.test(x.id) ? +x.id : x.id].concat(x.key.map(S), x.out.map(S)); });
+    var packedVeins = veins.filter(function(v){ return usable.has(v[1]); }).map(function(v){ return [S(v[0]), S(v[1])]; });
+    var fingerprint = cyrb53(JSON.stringify([KEY_FIELDS, OUT_FIELDS, pool, packedVeins, packedRows])).slice(0, 8);
+
+    built = {
+      format: 1,
+      name: 'cDAVF Classifier dictionary',
+      author: 'Alex Kostynskyy',
+      version: version,
+      sourceFile: fileName,
+      builtAt: new Date().toISOString(),
+      fingerprint: fingerprint,
+      keyFields: KEY_FIELDS,
+      outFields: OUT_FIELDS,
+      strings: pool,
+      veins: packedVeins,
+      rows: packedRows
+    };
+
+    if (LIVE && LIVE.version === version && LIVE.fingerprint !== fingerprint) {
+      warnings.push('Same date as the live dictionary (v' + version + ') but different content. Rename the file with today\'s date so users can tell the versions apart.');
+    }
+
+    render(errors, warnings, rows, veins, expected);
+  }
+
+  function unpack(d){
+    var map = new Map();
+    d.rows.forEach(function(r){
+      var key = r.slice(1, 1 + d.keyFields.length).map(function(i){ return d.strings[i]; });
+      var out = {};
+      d.outFields.forEach(function(f, j){ out[f] = d.strings[r[1 + d.keyFields.length + j]]; });
+      map.set(key.join('|'), { id: r[0], key: key, out: out });
+    });
+    var veins = new Map();
+    d.veins.forEach(function(v){ veins.set(d.strings[v[0]], d.strings[v[1]]); });
+    return { rows: map, veins: veins };
+  }
+
+  function render(errors, warnings, rows, veins, expected){
+    $('report').classList.remove('hidden');
+    $('stats').innerHTML = [
+      ['Version', built.version ? 'v' + built.version : '—'],
+      ['Combinations', rows.length + ' / ' + expected],
+      ['Veins', built.veins.length],
+      ['Fingerprint', built.fingerprint]
+    ].map(function(s){ return '<div class="stat"><b>' + s[0] + '</b><span>' + esc(s[1]) + '</span></div>'; }).join('');
+
+    var html = '';
+    errors.forEach(function(e){ html += '<div class="msg err"><b>Error.</b> ' + esc(e) + '</div>'; });
+    warnings.forEach(function(w){ html += '<div class="msg warn"><b>Note.</b> ' + esc(w) + '</div>'; });
+    if (!errors.length) html += '<div class="msg ok">Dictionary is valid and ready to publish.</div>';
+    $('msgs').innerHTML = html;
+
+    var ch = '';
+    if (LIVE) {
+      var a = unpack(LIVE), b = unpack(built);
+      if (LIVE.fingerprint === built.fingerprint) {
+        ch = '<div class="msg ok">Content is identical to the live dictionary (v' + esc(LIVE.version) + ').</div>';
+      } else {
+        var resultChanges = [], wordingOnly = 0, added = 0, removed = 0;
+        b.rows.forEach(function(nr, k){
+          var or = a.rows.get(k);
+          if (!or) { added++; return; }
+          var diffs = ['DES','Borden','Cognard'].filter(function(f){ return or.out[f] !== nr.out[f]; });
+          if (diffs.length) resultChanges.push({ nr: nr, or: or, diffs: diffs });
+          else if (LIVE.outFields.some(function(f){ return or.out[f] !== nr.out[f]; })) wordingOnly++;
+        });
+        a.rows.forEach(function(_, k){ if (!b.rows.has(k)) removed++; });
+        var vAdd = [], vDel = [], vMove = [];
+        b.veins.forEach(function(g, n){ if (!a.veins.has(n)) vAdd.push(n); else if (a.veins.get(n) !== g) vMove.push(n + ': ' + a.veins.get(n) + ' → ' + g); });
+        a.veins.forEach(function(_, n){ if (!b.veins.has(n)) vDel.push(n); });
+
+        ch += '<h2 style="margin-top:20px">Changes from live v' + esc(LIVE.version) + '</h2>';
+        ch += '<div class="stats">' + [
+          ['Results changed', resultChanges.length],
+          ['Wording only', wordingOnly],
+          ['Combinations added / removed', added + ' / ' + removed],
+          ['Veins added / removed / moved', vAdd.length + ' / ' + vDel.length + ' / ' + vMove.length]
+        ].map(function(s){ return '<div class="stat"><b>' + s[0] + '</b><span>' + s[1] + '</span></div>'; }).join('') + '</div>';
+        if (vAdd.length) ch += '<p class="muted">Added veins: ' + esc(vAdd.join(', ')) + '</p>';
+        if (vDel.length) ch += '<p class="muted">Removed veins: ' + esc(vDel.join(', ')) + '</p>';
+        if (vMove.length) ch += '<p class="muted">Regrouped veins: ' + esc(vMove.join('; ')) + '</p>';
+        if (resultChanges.length) {
+          ch += '<table style="margin-top:12px"><thead><tr><th>ID</th><th>Inputs</th><th>Changed</th><th>Before</th><th>After</th></tr></thead><tbody>';
+          resultChanges.slice(0, 200).forEach(function(c){
+            ch += '<tr><td class="mono">' + esc(c.nr.id) + '</td><td>' + esc(c.nr.key.join(' · ')) + '</td><td>' + esc(c.diffs.join(', ')) + '</td><td>' +
+              esc(c.diffs.map(function(f){ return c.or.out[f]; }).join(' | ')) + '</td><td>' + esc(c.diffs.map(function(f){ return c.nr.out[f]; }).join(' | ')) + '</td></tr>';
+          });
+          ch += '</tbody></table>';
+          if (resultChanges.length > 200) ch += '<p class="muted">Showing the first 200 of ' + resultChanges.length + '.</p>';
+        }
+      }
+    }
+    $('changes').innerHTML = ch;
+
+    $('publish').classList.remove('hidden');
+    $('dl').disabled = errors.length > 0;
+  }
+
+  function download(){
+    if (!built) return;
+    var text = '/*\n * cDAVF Classifier dictionary v' + built.version + ' (fingerprint ' + built.fingerprint + ')\n' +
+      ' * Generated from ' + built.sourceFile + ' on ' + built.builtAt.slice(0, 10) + '\n' +
+      ' * © Alex Kostynskyy. cDAVF classification algorithm and DES. All rights reserved.\n' +
+      ' * Research use only. Reproduction or adaptation requires the author\'s written permission.\n */\n' +
+      'window.CDAVF_DICTIONARY = ' + JSON.stringify(built) + ';\n';
+    var blob = new Blob([text], { type: 'text/javascript' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'dictionary.js';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
+})();
+</script>
+</body>
+</html>
