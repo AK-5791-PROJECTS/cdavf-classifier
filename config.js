@@ -9,7 +9,7 @@ window.CDAVF_CONFIG = {
    * Paste the Google Apps Script "Web app URL" (ends with /exec) between the quotes.
    * Leave it empty ("") to switch tracking and the feedback form off.
    */
-  trackingUrl: "",
+  trackingUrl: "https://script.google.com/macros/s/AKfycbzrIzk6cW21NsOkeNXKFUr3XTECQY1Z8CZWnNIHTdZB45eAQQ2mzgHc8JosxehrulqiWw/exec",
 
   /* Contact email shown in the footer and the privacy notice. */
   contactEmail: "r.storage.1975.2@gmail.com"
