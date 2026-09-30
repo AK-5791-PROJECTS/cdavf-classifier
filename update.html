@@ -92,7 +92,7 @@ footer{padding:18px 32px;border-top:1px solid var(--line);background:var(--panel
   </section>
 </main>
 
-<footer>© Alex Kostynskyy. cDAVF classification algorithm and DES. All rights reserved. Research use only.</footer>
+<footer>© Alex Kostynskyy. Software, classification dictionary and DES system. Borden and Cognard classifications are those of their original authors. Research use only.</footer>
 
 <script src="dictionary.js" onerror="void 0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -335,8 +335,8 @@ footer{padding:18px 32px;border-top:1px solid var(--line);background:var(--panel
     if (!built) return;
     var text = '/*\n * cDAVF Classifier dictionary v' + built.version + ' (fingerprint ' + built.fingerprint + ')\n' +
       ' * Generated from ' + built.sourceFile + ' on ' + built.builtAt.slice(0, 10) + '\n' +
-      ' * © Alex Kostynskyy. cDAVF classification algorithm and DES. All rights reserved.\n' +
-      ' * Research use only. Reproduction or adaptation requires the author\'s written permission.\n */\n' +
+      ' * © Alex Kostynskyy. Software, classification dictionary and DES system. Borden and Cognard are those of their original authors.\n' +
+      ' * Research use only. Reproduction or adaptation of this software, the dictionary or the DES system requires the author\'s written permission.\n */\n' +
       'window.CDAVF_DICTIONARY = ' + JSON.stringify(built) + ';\n';
     var blob = new Blob([text], { type: 'text/javascript' });
     var a = document.createElement('a');
