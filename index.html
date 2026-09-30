@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>cDAVF Classifier — Alex Kostynskyy</title>
 <meta name="author" content="Alex Kostynskyy">
-<meta name="version" content="1.1.0">
+<meta name="version" content="1.1.1">
 <meta name="copyright" content="© Alex Kostynskyy. All rights reserved.">
 <meta name="description" content="Classify a cranial dural arteriovenous fistula (one lesion at a time) with DES, Borden and Cognard. Research use only. By Alex Kostynskyy.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231D3B66'/%3E%3Csvg x='4' y='4' width='24' height='24' viewBox='2.5 5.5 19 19' fill='none' stroke-linecap='round'%3E%3Cpath d='M3.5 17A8.5 8.5 0 0 1 20.5 17' stroke='%23FFFFFF' stroke-opacity='0.55' stroke-width='1.6'%3E%3C/path%3E%3Cpath d='M6.5 17A5.5 5.5 0 0 1 15.54 12.79' stroke='%23FFFFFF' stroke-width='2.2'%3E%3C/path%3E%3Cpath d='M19.8 21C18.9 17.8 17.6 14.6 15.54 12.79' stroke='%23F08A6C' stroke-width='1.5'%3E%3C/path%3E%3Ccircle cx='15.54' cy='12.79' r='2' fill='%23F08A6C'%3E%3C/circle%3E%3C/svg%3E%3C/svg%3E">
@@ -240,7 +240,7 @@ h2{margin:0;font-size:18px;font-weight:600}
 
 <div class="notice" id="notice" hidden>
   <div class="notice-in">
-    <p><b>Help improve this tool?</b> With your permission, the author records your IP address and an anonymous browser ID to count users. If you decline, only anonymous usage counts are kept. The tool works either way. <a href="privacy.html">Privacy notice</a></p>
+    <p><b>Help improve this tool?</b> With your consent, the author also records your IP address and a random browser ID to count users. Either way, anonymous usage records are kept: page visits and completed classifications (options selected, result and software versions). Declining does not limit the classifier. <a href="privacy.html">Privacy notice</a></p>
     <div class="notice-btns"><button class="btn ghost" id="consent-no" type="button">Decline</button><button class="btn primary" id="consent-yes" type="button">Accept</button></div>
   </div>
 </div>
@@ -372,12 +372,12 @@ h2{margin:0;font-size:18px;font-weight:600}
         </div>
         <div>
           <label class="flab" for="fb-comment">Comments</label>
-          <textarea id="fb-comment" maxlength="1500" placeholder="What worked, what did not, what you would change"></textarea>
+          <textarea id="fb-comment" maxlength="1500" placeholder="What worked, what did not, what you would change. No patient identifiers, please."></textarea>
         </div>
         <div>
           <label class="flab" for="fb-email">Email <span style="font-weight:400;color:var(--muted)">(optional, only if you would like a reply)</span></label>
           <input type="email" id="fb-email" maxlength="200" autocomplete="email">
-          <p class="note">Your answers and this classification are sent to the author. Your email is sent only if you enter it; your IP address only if you accepted usage recording. <a href="privacy.html">Privacy notice</a></p>
+          <p class="note">Your answers and this classification are sent to the author. Your email is sent only if you enter it; your IP address only if you accepted. Do not include patient identifiers. <a href="privacy.html">Privacy notice</a></p>
         </div>
         <div class="fb-actions">
           <button class="btn primary" type="submit" id="fb-send">Send feedback</button>
@@ -419,7 +419,7 @@ h2{margin:0;font-size:18px;font-weight:600}
 (function(){
   'use strict';
   /* Classifier (page code) version. Bump when index.html changes: major.minor.patch */
-  var APP_VERSION = '1.1.0', APP_DATE = '2026-09-30';
+  var APP_VERSION = '1.1.1', APP_DATE = '2026-09-30';
   var D = window.CDAVF_DICTIONARY, CFG = window.CDAVF_CONFIG || {};
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }

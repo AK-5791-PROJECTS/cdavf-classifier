@@ -24,44 +24,48 @@ a{color:#1D3B66}
 <main>
 <div class="card">
   <h1>Privacy notice</h1>
-  <p class="muted">cDAVF Classifier · Alex Kostynskyy · Last updated 30 September 2026</p>
+  <p class="muted">cDAVF Classifier · Last updated 30 September 2026</p>
 
   <h2>Who is responsible</h2>
-  <p>The cDAVF Classifier is a free research tool created and operated by Alex Kostynskyy (the "author"), who decides how the information below is used<span id="contact"></span>.</p>
+  <p>The cDAVF Classifier is a free research tool created and operated by Alex Kostynskyy (the "author"). Privacy contact: <span class="contact-email">[contact email to be added]</span>.</p>
 
   <h2>What is recorded</h2>
   <ul>
-    <li><b>Always, anonymously:</b> that the page was opened, each completed classification (the options selected and the result), and the classifier and dictionary versions. This information does not identify you.</li>
-    <li><b>Only if you choose "Accept":</b> your IP address (obtained through the ipify service, api.ipify.org), a random browser ID stored on your device, your browser type, language and time zone, and the page that referred you.</li>
-    <li><b>Only if you send feedback:</b> your rating, answers, role and comments, and your email address if you choose to enter it.</li>
+    <li><b>Anonymous usage records (always):</b> page visits and completed classifications, meaning the options selected, the result, and the classifier and dictionary versions. These records do not include your IP address or browser ID.</li>
+    <li><b>Only with your consent ("Accept"):</b> your IP address (obtained through the ipify service), a random browser ID stored in your browser, your browser type, language and time zone, and the page that referred you.</li>
+    <li><b>Feedback (optional):</b> your rating, answers, role and comments. Your email address only if you enter it; your IP address only if you accepted.</li>
   </ul>
-  <p>The tool never asks for patient information. Please do not enter any.</p>
 
-  <h2>Why</h2>
-  <p>To understand how often and by how many people the tool is used, and to validate and improve the classification algorithm. The information is not used for advertising or profiling, and is not sold or shared.</p>
+  <h2>Patient information</h2>
+  <p>The tool does not request patient identifiers. Do not enter names, MRNs, dates of birth, exact dates, or other potentially identifying information, including in feedback comments.</p>
 
-  <h2>Basis for processing</h2>
-  <p>Your consent for the optional information (IP address, browser ID and browser details) and for feedback. The author's legitimate interest in anonymous usage statistics for the rest.</p>
+  <h2>Consent and use of information</h2>
+  <p>The information is used to understand how often and by how many people the tool is used, and to validate and improve the classification algorithm. Your IP address and browser ID are recorded only if you accept. Declining does not prevent you from using the classifier.</p>
+  <p>The information is not sold, not used for advertising, and not intentionally disclosed for unrelated purposes.</p>
 
-  <h2>Where it is stored and who can see it</h2>
-  <p>In a private Google Sheet in the author's Google account, accessible only to the author. Google may store this data on servers outside your country.</p>
-
-  <h2>How long it is kept</h2>
-  <p>Until the project ends or for five years, whichever comes first. It is then deleted.</p>
-
-  <h2>Your choices and rights</h2>
+  <h2>Service providers</h2>
+  <p>Some technical information is processed by providers needed to run the tool, under their own privacy policies and possibly outside your country:</p>
   <ul>
-    <li>You can use the tool without accepting. Declining does not limit any feature.</li>
-    <li>You can change your choice at any time with <b>Privacy choices</b> at the bottom of the classifier.</li>
-    <li>You can ask the author for a copy of the information about you, or ask for it to be corrected or deleted.</li>
-    <li>You may also contact the data protection authority in your country.</li>
+    <li><b>GitHub</b> hosts the website and receives standard technical information, such as your IP address, when pages load.</li>
+    <li><b>Google</b> supplies the page fonts and stores the usage records in Google Sheets.</li>
+    <li><b>ipify</b> returns your IP address to your browser, only if you accept.</li>
+  </ul>
+
+  <h2>Storage and retention</h2>
+  <p>Records are kept in a private Google Sheet accessible only to the author, until the project ends or for five years, whichever comes first, and are then deleted.</p>
+
+  <h2>Your choices</h2>
+  <ul>
+    <li>Change your choice at any time with <b>Privacy choices</b> at the bottom of the classifier.</li>
+    <li>For access, correction, deletion or any privacy question, contact <span class="contact-email">[contact email to be added]</span>. Anonymous records cannot be linked to you, so they cannot be retrieved individually.</li>
+    <li>You may also contact the privacy regulator where you live; in Canada, the Office of the Privacy Commissioner of Canada.</li>
   </ul>
 
   <h2>Children</h2>
-  <p>The tool is intended for healthcare professionals and researchers and is not directed at children.</p>
+  <p>The tool is intended for healthcare professionals and researchers, not children.</p>
 
   <h2>Changes</h2>
-  <p>Any change to this notice will be posted on this page with a new date.</p>
+  <p>Changes to this notice will be posted on this page with a new date.</p>
 
   <p class="muted" style="margin-top:28px">© Alex Kostynskyy. For research use only. <a href="./">Back to the classifier</a></p>
 </div>
@@ -69,7 +73,7 @@ a{color:#1D3B66}
 <script src="config.js"></script>
 <script>
   var e = (window.CDAVF_CONFIG || {}).contactEmail;
-  if (e) { var s = document.getElementById('contact'); s.textContent = '. Contact: '; var a = document.createElement('a'); a.href = 'mailto:' + e; a.textContent = e; s.appendChild(a); }
+  if (e) document.querySelectorAll('.contact-email').forEach(function(el){ el.textContent = ''; var a = document.createElement('a'); a.href = 'mailto:' + e; a.textContent = e; el.appendChild(a); });
 </script>
 </body>
 </html>
