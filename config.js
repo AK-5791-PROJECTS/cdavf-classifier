@@ -11,6 +11,6 @@ window.CDAVF_CONFIG = {
    */
   trackingUrl: "",
 
-  /* Contact email shown in the footer and the privacy notice, e.g. "you@example.com". */
-  contactEmail: ""
+  /* Contact email shown in the footer and the privacy notice. */
+  contactEmail: "r.storage.1975.2@gmail.com"
 };
