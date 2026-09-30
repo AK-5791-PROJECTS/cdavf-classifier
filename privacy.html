@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy notice — cDAVF Classifier</title>
+<meta name="author" content="Alex Kostynskyy">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Newsreader:opsz,wght@6..72,600&display=swap">
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:#F4F3EF;color:#17181C;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.6}
+main{max-width:760px;margin:0 auto;padding:40px 20px 64px}
+.card{background:#fff;border:1px solid #E2DFD6;border-radius:16px;padding:32px}
+h1{margin:0 0 4px;font-family:'Newsreader',Georgia,serif;font-size:30px;font-weight:600}
+h2{margin:28px 0 8px;font-size:17px;color:#1D3B66}
+p,li{color:#2B2E36}
+ul{padding-left:20px}
+.muted{color:#5A5F6B;font-size:13px}
+a{color:#1D3B66}
+</style>
+</head>
+<body>
+<main>
+<div class="card">
+  <h1>Privacy notice</h1>
+  <p class="muted">cDAVF Classifier · Alex Kostynskyy · Last updated 30 September 2026</p>
+
+  <h2>Who is responsible</h2>
+  <p>The cDAVF Classifier is a free research tool created and operated by Alex Kostynskyy (the "author"), who decides how the information below is used<span id="contact"></span>.</p>
+
+  <h2>What is recorded</h2>
+  <ul>
+    <li><b>Always, anonymously:</b> that the page was opened, each completed classification (the options selected and the result), and the classifier and dictionary versions. This information does not identify you.</li>
+    <li><b>Only if you choose "Accept":</b> your IP address (obtained through the ipify service, api.ipify.org), a random browser ID stored on your device, your browser type, language and time zone, and the page that referred you.</li>
+    <li><b>Only if you send feedback:</b> your rating, answers, role and comments, and your email address if you choose to enter it.</li>
+  </ul>
+  <p>The tool never asks for patient information. Please do not enter any.</p>
+
+  <h2>Why</h2>
+  <p>To understand how often and by how many people the tool is used, and to validate and improve the classification algorithm. The information is not used for advertising or profiling, and is not sold or shared.</p>
+
+  <h2>Basis for processing</h2>
+  <p>Your consent for the optional information (IP address, browser ID and browser details) and for feedback. The author's legitimate interest in anonymous usage statistics for the rest.</p>
+
+  <h2>Where it is stored and who can see it</h2>
+  <p>In a private Google Sheet in the author's Google account, accessible only to the author. Google may store this data on servers outside your country.</p>
+
+  <h2>How long it is kept</h2>
+  <p>Until the project ends or for five years, whichever comes first. It is then deleted.</p>
+
+  <h2>Your choices and rights</h2>
+  <ul>
+    <li>You can use the tool without accepting. Declining does not limit any feature.</li>
+    <li>You can change your choice at any time with <b>Privacy choices</b> at the bottom of the classifier.</li>
+    <li>You can ask the author for a copy of the information about you, or ask for it to be corrected or deleted.</li>
+    <li>You may also contact the data protection authority in your country.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>The tool is intended for healthcare professionals and researchers and is not directed at children.</p>
+
+  <h2>Changes</h2>
+  <p>Any change to this notice will be posted on this page with a new date.</p>
+
+  <p class="muted" style="margin-top:28px">© Alex Kostynskyy. For research use only. <a href="./">Back to the classifier</a></p>
+</div>
+</main>
+<script src="config.js"></script>
+<script>
+  var e = (window.CDAVF_CONFIG || {}).contactEmail;
+  if (e) { var s = document.getElementById('contact'); s.textContent = '. Contact: '; var a = document.createElement('a'); a.href = 'mailto:' + e; a.textContent = e; s.appendChild(a); }
+</script>
+</body>
+</html>

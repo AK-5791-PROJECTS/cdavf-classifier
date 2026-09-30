@@ -5,15 +5,12 @@
 window.CDAVF_CONFIG = {
 
   /*
-   * Feedback survey (Google Forms).
-   * 1. In your form: ⋮ menu → "Get pre-filled link".
-   * 2. Type CLASSIFICATION in the "Classification" question and VERSION in the
-   *    "Dictionary version" question, then click "Get link" → "Copy link".
-   * 3. Paste the link between the quotes below.
-   * Leave it empty ("") to hide the survey prompt.
+   * Usage tracking and feedback.
+   * Paste the Google Apps Script "Web app URL" (ends with /exec) between the quotes.
+   * Leave it empty ("") to switch tracking and the feedback form off.
    */
-  surveyLink: "",
+  trackingUrl: "",
 
-  /* Optional contact email shown in the footer, e.g. "you@example.com". */
+  /* Contact email shown in the footer and the privacy notice, e.g. "you@example.com". */
   contactEmail: ""
 };

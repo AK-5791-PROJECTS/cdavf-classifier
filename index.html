@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>cDAVF Classifier — Alex Kostynskyy</title>
 <meta name="author" content="Alex Kostynskyy">
-<meta name="version" content="1.0.0">
+<meta name="version" content="1.1.0">
 <meta name="copyright" content="© Alex Kostynskyy. All rights reserved.">
 <meta name="description" content="Classify a cranial dural arteriovenous fistula (one lesion at a time) with DES, Borden and Cognard. Research use only. By Alex Kostynskyy.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231D3B66'/%3E%3Csvg x='4' y='4' width='24' height='24' viewBox='2.5 5.5 19 19' fill='none' stroke-linecap='round'%3E%3Cpath d='M3.5 17A8.5 8.5 0 0 1 20.5 17' stroke='%23FFFFFF' stroke-opacity='0.55' stroke-width='1.6'%3E%3C/path%3E%3Cpath d='M6.5 17A5.5 5.5 0 0 1 15.54 12.79' stroke='%23FFFFFF' stroke-width='2.2'%3E%3C/path%3E%3Cpath d='M19.8 21C18.9 17.8 17.6 14.6 15.54 12.79' stroke='%23F08A6C' stroke-width='1.5'%3E%3C/path%3E%3Ccircle cx='15.54' cy='12.79' r='2' fill='%23F08A6C'%3E%3C/circle%3E%3C/svg%3E%3C/svg%3E">
@@ -26,7 +26,7 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
-button,input{font:inherit;color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 [hidden]{display:none!important}
 #axes{display:flex;flex-direction:column;gap:10px}
 a.btn{text-decoration:none}
@@ -139,10 +139,37 @@ h2{margin:0;font-size:18px;font-weight:600}
 .why-row b{font-size:13px;font-weight:600;color:var(--navy)}
 .why-row span{font-size:14px;line-height:1.45;color:var(--ink-2)}
 
-.survey{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;padding:16px 18px;border:1px solid var(--navy-line);border-radius:14px;background:var(--navy-soft)}
-.survey p{margin:0;font-size:14px}
-.survey p b{display:block;font-size:14px}
-.survey p span{color:var(--muted);font-size:13px}
+.fb{margin-top:22px;border:1px solid var(--navy-line);border-radius:14px;background:var(--navy-soft)}
+.fb-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px}
+.fb-head p{margin:0;font-size:14px}
+.fb-head p b{display:block;font-size:14px}
+.fb-head p span{color:var(--muted);font-size:13px}
+.fb form{padding:4px 18px 18px;display:flex;flex-direction:column;gap:16px;border-top:1px solid var(--navy-line)}
+.fb fieldset{border:0;margin:0;padding:0;min-width:0}
+.fb legend,.fb .flab{display:block;padding:0;margin:12px 0 8px;font-size:13px;font-weight:600;color:var(--ink)}
+.fb .req{color:var(--brick)}
+.stars{display:flex;gap:4px}
+.stars input{position:absolute;opacity:0;pointer-events:none}
+.stars label{font-size:30px;line-height:1;color:#C9C6BC;cursor:pointer;padding:2px}
+.stars label.lit{color:#C8891A}
+.stars input:focus-visible + label{outline:2px solid var(--navy);outline-offset:2px;border-radius:4px}
+.fb .seg{max-width:360px;background:var(--panel)}
+.checks{display:flex;gap:8px;flex-wrap:wrap}
+.checks label{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--chip-line);border-radius:999px;background:var(--panel);font-size:13px;cursor:pointer}
+.fb select,.fb textarea,.fb input[type=email]{width:100%;max-width:520px;font-size:14px;padding:10px 12px;border:1px solid var(--field);border-radius:10px;background:var(--panel)}
+.fb textarea{min-height:84px;resize:vertical}
+.fb select:focus,.fb textarea:focus,.fb input[type=email]:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(29,59,102,.15)}
+.fb .note{font-size:12px;color:var(--muted);margin:6px 0 0}
+.fb-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fb-err{font-size:13px;color:var(--brick-ink)}
+.fb-done{margin:0;padding:16px 18px;font-size:14px;color:#1F5B3A}
+.notice{background:var(--panel-2);border-bottom:1px solid var(--line)}
+.notice-in{max-width:1440px;margin:0 auto;padding:10px 48px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13px;color:var(--ink-3)}
+.notice-in p{margin:0}
+.notice a,.foot a{color:var(--navy)}
+.notice .btn{height:36px}
+.notice-btns{display:flex;gap:8px;flex:none}
+.notice .btn.ghost{border-color:var(--field)}
 
 .res-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:22px;padding-top:14px;border-top:1px solid var(--line-2);font-size:12px;color:var(--muted)}
 .res-foot code{font-family:var(--mono);color:var(--ink-2)}
@@ -185,7 +212,8 @@ h2{margin:0;font-size:18px;font-weight:600}
   .grades{grid-template-columns:minmax(0,1fr)}
   .des{padding:18px}.des-title{font-size:25px}
   .axis,.why-row{grid-template-columns:minmax(0,1fr);gap:6px}
-  .survey{flex-direction:column;align-items:stretch}
+  .fb-head{flex-direction:column;align-items:stretch}
+  .notice-in{padding:10px 16px;flex-direction:column;align-items:stretch}
   .top-in{align-items:flex-start}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -209,6 +237,13 @@ h2{margin:0;font-size:18px;font-weight:600}
     </div>
   </div>
 </header>
+
+<div class="notice" id="notice" hidden>
+  <div class="notice-in">
+    <p><b>Help improve this tool?</b> With your permission, the author records your IP address and an anonymous browser ID to count users. If you decline, only anonymous usage counts are kept. The tool works either way. <a href="privacy.html">Privacy notice</a></p>
+    <div class="notice-btns"><button class="btn ghost" id="consent-no" type="button">Decline</button><button class="btn primary" id="consent-yes" type="button">Accept</button></div>
+  </div>
+</div>
 
 <div class="fatal" id="fatal" hidden>The classification dictionary (dictionary.js) could not be loaded. Make sure it sits in the same folder as this page.</div>
 
@@ -299,9 +334,57 @@ h2{margin:0;font-size:18px;font-weight:600}
       <div id="why"></div>
     </div>
 
-    <div class="survey" id="survey" hidden>
-      <p><b>Help validate this tool</b><span>One-minute survey. Your classification and version details are filled in for you.</span></p>
-      <a class="btn primary" id="survey-link" href="#" target="_blank" rel="noopener">Give feedback</a>
+    <div class="fb" id="fb" hidden>
+      <div class="fb-head">
+        <p><b>Help validate this tool</b><span>Rate it and tell us whether the result matches your own grading. About one minute.</span></p>
+        <button class="btn primary" id="fb-open" type="button" aria-expanded="false" aria-controls="fb-form">Rate &amp; give feedback</button>
+      </div>
+      <form id="fb-form" hidden novalidate>
+        <fieldset>
+          <legend>Your rating of this tool <span class="req">*</span></legend>
+          <div class="stars" id="fb-stars">
+            <input type="radio" name="fb-rating" id="fb-r1" value="1"><label for="fb-r1" aria-label="1 star">★</label>
+            <input type="radio" name="fb-rating" id="fb-r2" value="2"><label for="fb-r2" aria-label="2 stars">★</label>
+            <input type="radio" name="fb-rating" id="fb-r3" value="3"><label for="fb-r3" aria-label="3 stars">★</label>
+            <input type="radio" name="fb-rating" id="fb-r4" value="4"><label for="fb-r4" aria-label="4 stars">★</label>
+            <input type="radio" name="fb-rating" id="fb-r5" value="5"><label for="fb-r5" aria-label="5 stars">★</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Does this result match your own grading? <span class="req">*</span></legend>
+          <div class="seg">
+            <input type="radio" name="fb-agree" id="fb-a1" value="Yes"><label for="fb-a1">Yes</label>
+            <input type="radio" name="fb-agree" id="fb-a2" value="Partly"><label for="fb-a2">Partly</label>
+            <input type="radio" name="fb-agree" id="fb-a3" value="No"><label for="fb-a3">No</label>
+          </div>
+        </fieldset>
+        <fieldset id="fb-differs" hidden>
+          <legend>Which classification differs?</legend>
+          <div class="checks">
+            <label><input type="checkbox" value="DES"> DES</label>
+            <label><input type="checkbox" value="Borden"> Borden</label>
+            <label><input type="checkbox" value="Cognard"> Cognard</label>
+          </div>
+        </fieldset>
+        <div>
+          <label class="flab" for="fb-role">Your role</label>
+          <select id="fb-role"><option value="">Choose…</option><option>Attending / consultant</option><option>Fellow</option><option>Resident</option><option>Technologist</option><option>Researcher</option><option>Other</option></select>
+        </div>
+        <div>
+          <label class="flab" for="fb-comment">Comments</label>
+          <textarea id="fb-comment" maxlength="1500" placeholder="What worked, what did not, what you would change"></textarea>
+        </div>
+        <div>
+          <label class="flab" for="fb-email">Email <span style="font-weight:400;color:var(--muted)">(optional, only if you would like a reply)</span></label>
+          <input type="email" id="fb-email" maxlength="200" autocomplete="email">
+          <p class="note">Your answers and this classification are sent to the author. Your email is sent only if you enter it; your IP address only if you accepted usage recording. <a href="privacy.html">Privacy notice</a></p>
+        </div>
+        <div class="fb-actions">
+          <button class="btn primary" type="submit" id="fb-send">Send feedback</button>
+          <span class="fb-err" id="fb-err" role="alert"></span>
+        </div>
+      </form>
+      <p class="fb-done" id="fb-done" hidden role="status">Thank you. Your feedback was sent.</p>
     </div>
 
     <div class="res-foot">
@@ -313,7 +396,7 @@ h2{margin:0;font-size:18px;font-weight:600}
 
 <footer class="foot">
   <div class="foot-in">
-    <span><b>© <span id="year">2026</span> Alex Kostynskyy.</b> cDAVF classification algorithm and DES. All rights reserved. <span id="foot-ver"></span><span id="contact"></span></span>
+    <span><b>© <span id="year">2026</span> Alex Kostynskyy.</b> cDAVF classification algorithm and DES. All rights reserved. <span id="foot-ver"></span> <a href="privacy.html">Privacy</a> · <a href="#" id="privacy-choices">Privacy choices</a>.<span id="contact"></span></span>
     <span>For research use only. Not for clinical decision-making. Reproduction or adaptation requires the author’s written permission.</span>
   </div>
 </footer>
@@ -336,7 +419,7 @@ h2{margin:0;font-size:18px;font-weight:600}
 (function(){
   'use strict';
   /* Classifier (page code) version. Bump when index.html changes: major.minor.patch */
-  var APP_VERSION = '1.0.0', APP_DATE = '2026-09-30';
+  var APP_VERSION = '1.1.0', APP_DATE = '2026-09-30';
   var D = window.CDAVF_DICTIONARY, CFG = window.CDAVF_CONFIG || {};
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -512,7 +595,8 @@ h2{margin:0;font-size:18px;font-weight:600}
       $('borden').textContent = '—'; $('cognard').textContent = '—';
       $('borden-sub').textContent = ''; $('cognard-sub').textContent = '';
       $('why').innerHTML = ''; $('combo-id').textContent = '—';
-      $('survey').hidden = true;
+      $('fb').hidden = true;
+      scheduleUse(null);
       $('mbar').classList.add('away');
       return;
     }
@@ -536,11 +620,8 @@ h2{margin:0;font-size:18px;font-weight:600}
     $('m-cognard').textContent = c ? '?' : roman(o['Cognard']);
     updateBar();
 
-    var link = CFG.surveyLink || '';
-    if (link && link.indexOf('CLASSIFICATION') >= 0) {
-      $('survey-link').href = link.replace('CLASSIFICATION', encodeURIComponent(summary(r))).replace('VERSION', encodeURIComponent('Classifier ' + APP + ' · Dictionary ' + VERSION + ' (' + FP + ')'));
-      $('survey').hidden = false;
-    } else { $('survey').hidden = true; }
+    $('fb').hidden = !TRACK;
+    scheduleUse(r);
   }
 
   function gradeText(v){ return isIndet(v) ? 'Indeterminate' : roman(v); }
@@ -629,6 +710,96 @@ h2{margin:0;font-size:18px;font-weight:600}
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function(es){ resultsVisible = es[0].isIntersecting; updateBar(); }, { threshold: 0.15 }).observe($('results'));
   }
+
+  /* ---------- usage tracking and feedback (Google Sheet via Apps Script; set trackingUrl in config.js) ---------- */
+  var TRACK = String(CFG.trackingUrl || '').trim();
+  function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function unstore(k){ try { localStorage.removeItem(k); } catch (e) {} }
+  /* Consent: 'yes' = IP address + browser ID recorded; 'no' or not yet answered = anonymous counts only. */
+  var consent = store('cdavf_consent');
+  var visitor = null, ipPromise = Promise.resolve('');
+  function applyConsent(){
+    if (consent === 'yes' && TRACK) {
+      visitor = store('cdavf_vid');
+      if (!visitor) { visitor = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2)); store('cdavf_vid', visitor); }
+      ipPromise = fetch('https://api.ipify.org?format=json').then(function(r){ return r.json(); }).then(function(j){ return j.ip || 'unavailable'; }).catch(function(){ return 'unavailable'; });
+    } else {
+      visitor = null; unstore('cdavf_vid'); ipPromise = Promise.resolve('');
+    }
+  }
+  applyConsent();
+  function send(type, extra){
+    if (!TRACK) return Promise.resolve();
+    return ipPromise.then(function(ip){
+      var body = { type: type, consent: consent === 'yes' ? 'yes' : 'no', appVersion: APP, dictVersion: VERSION + ' (' + FP + ')', page: location.origin + location.pathname };
+      if (consent === 'yes') {
+        body.ip = ip; body.visitor = visitor || 'no-storage'; body.userAgent = navigator.userAgent; body.language = navigator.language || '';
+        body.timezone = (window.Intl && Intl.DateTimeFormat().resolvedOptions().timeZone) || '';
+      }
+      for (var k in extra) body[k] = extra[k];
+      if (consent !== 'yes') delete body.referrer;
+      return fetch(TRACK, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    });
+  }
+  var logged = {}, useTimer = null;
+  function logUse(r){
+    if (!r || logged[r.id]) return; logged[r.id] = 1;
+    send('use', { classification: summary(r), combo: '#' + r.id, des: r.out['DES'], borden: gradeText(r.out['Borden']), cognard: gradeText(r.out['Cognard']) }).catch(function(){});
+  }
+  function scheduleUse(r){
+    clearTimeout(useTimer);
+    if (!r) return;
+    /* count a classification once the inputs have settled, so clicking through options is not logged */
+    useTimer = setTimeout(function(){ if (current && current.id === r.id) logUse(r); }, 2500);
+  }
+  $('copy').addEventListener('click', function(){ logUse(current); });
+
+  var visitSent = false;
+  function sendVisit(){ if (visitSent) return; visitSent = true; send('visit', { referrer: document.referrer || '' }).catch(function(){}); }
+  function choose(v){
+    consent = v; store('cdavf_consent', v); applyConsent(); $('notice').hidden = true;
+    sendVisit();
+  }
+  if (TRACK) {
+    if (consent === 'yes' || consent === 'no') sendVisit();
+    else { $('notice').hidden = false; setTimeout(sendVisit, 3000); } /* no answer yet: counted as an anonymous visit after 3 s */
+  } else { $('privacy-choices').parentNode && ($('privacy-choices').style.display = 'none'); }
+  $('consent-yes').addEventListener('click', function(){ choose('yes'); });
+  $('consent-no').addEventListener('click', function(){ choose('no'); });
+  $('privacy-choices').addEventListener('click', function(e){ e.preventDefault(); $('notice').hidden = false; window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* feedback form */
+  var fbForm = $('fb-form');
+  $('fb-open').addEventListener('click', function(){
+    var open = fbForm.hidden; fbForm.hidden = !open; this.setAttribute('aria-expanded', String(open));
+    if (open) { var first = fbForm.querySelector('input'); if (first) first.focus(); }
+  });
+  function paintStars(){
+    var v = +((fbForm.querySelector('input[name="fb-rating"]:checked') || {}).value || 0);
+    $('fb-stars').querySelectorAll('label').forEach(function(l, i){ l.classList.toggle('lit', i < v); });
+  }
+  $('fb-stars').addEventListener('change', paintStars);
+  fbForm.addEventListener('change', function(e){
+    $('fb-err').textContent = '';
+    if (e.target.name === 'fb-agree') $('fb-differs').hidden = e.target.value === 'Yes';
+  });
+  fbForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var rating = fbForm.querySelector('input[name="fb-rating"]:checked'), agree = fbForm.querySelector('input[name="fb-agree"]:checked');
+    var email = $('fb-email').value.trim();
+    if (!rating || !agree) { $('fb-err').textContent = 'Please give a rating and say whether the result matches.'; return; }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('fb-err').textContent = 'Please check the email address.'; return; }
+    $('fb-err').textContent = ''; $('fb-send').disabled = true;
+    var differs = Array.prototype.map.call($('fb-differs').querySelectorAll('input:checked'), function(i){ return i.value; }).join(', ');
+    send('feedback', {
+      rating: +rating.value, agree: agree.value, differs: agree.value === 'Yes' ? '' : differs, role: $('fb-role').value,
+      comment: $('fb-comment').value.trim(), email: email, classification: current ? summary(current) : ''
+    }).then(function(){
+      fbForm.hidden = true; $('fb-open').hidden = true; $('fb-done').hidden = false;
+    }, function(){
+      $('fb-send').disabled = false; $('fb-err').textContent = 'Could not send. Check your connection and try again.';
+    });
+  });
 
   render();
 })();

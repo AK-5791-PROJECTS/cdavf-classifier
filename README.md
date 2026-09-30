@@ -11,7 +11,8 @@ For research use only. Not for clinical decision-making. No licence is granted: 
 |---|---|
 | `index.html` | The classifier page |
 | `dictionary.js` | The classification dictionary, generated from `DES_BORDEN_COGNARD_DICTIONARY_YYYYMMDD.xlsm` |
-| `config.js` | Survey link and optional contact email |
+| `config.js` | Tracking link (Google Apps Script) and contact email |
+| `privacy.html` | Privacy notice (what is recorded and why) |
 | `update.html` | Author tool: turns a new Excel dictionary into a new `dictionary.js`, with checks and a change report |
 
 ## Updating the dictionary
